@@ -1,0 +1,117 @@
+`timescale 1ns / 1ps
+
+module tb_automatic_washing_machine;
+
+// INPUTS
+reg clk;
+reg reset;
+reg door_close;
+reg start;
+reg filled; 
+reg detergent_added;
+reg cycle_timeout; 
+reg drained;
+reg spin_timeout;
+
+// OUTPUTS
+wire door_lock;
+wire motor_on;
+wire fill_valve_on;
+wire drain_valve_on;
+wire done;
+wire soap_wash;
+wire water_wash;
+
+
+// DUT INSTANTIATION
+automatic_washing_machine uut(
+    .clk(clk),
+    .reset(reset),
+    .door_close(door_close),
+    .start(start),
+    .filled(filled),
+    .detergent_added(detergent_added),
+    .cycle_timeout(cycle_timeout),
+    .drained(drained),
+    .spin_timeout(spin_timeout),
+    .door_lock(door_lock),
+    .motor_on(motor_on),
+    .fill_valve_on(fill_valve_on),
+    .drain_valve_on(drain_valve_on),
+    .done(done),
+    .soap_wash(soap_wash),
+    .water_wash(water_wash)
+);
+
+
+// CLOCK GENERATION
+always #5 clk = ~clk;
+
+
+// TEST SEQUENCE
+initial
+begin
+
+$monitor("time=%0t door_lock=%b motor_on=%b fill=%b drain=%b done=%b",
+          $time,door_lock,motor_on,fill_valve_on,drain_valve_on,done);
+
+
+// INITIAL VALUES
+clk = 0;
+reset = 0;
+door_close = 0;
+start = 0;
+filled = 0;
+detergent_added = 0;
+cycle_timeout = 0;
+drained = 0;
+spin_timeout = 0;
+
+
+// RESET
+#10 reset = 1;
+
+
+// CLOSE DOOR AND START
+#10 door_close = 1;
+start = 1;
+
+
+// WATER FILLED
+#20 filled = 1;
+
+
+// ADD DETERGENT
+#20 detergent_added = 1;
+
+
+// WASH CYCLE COMPLETE
+#40 cycle_timeout = 1;
+
+
+// WATER DRAINED
+#20 drained = 1;
+
+
+// RINSE WATER FILLED AGAIN
+#20 filled = 1;
+
+
+// SECOND CYCLE COMPLETE
+#40 cycle_timeout = 1;
+
+
+// SECOND DRAIN
+#20 drained = 1;
+
+
+// SPIN COMPLETE
+#40 spin_timeout = 1;
+
+
+// STOP SIMULATION
+#50 $finish;
+
+end
+
+endmodule
